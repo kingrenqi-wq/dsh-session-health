@@ -17,7 +17,7 @@ The "Recent" list is rebuilt from the log and covers the whole session; the **cl
 | Compacting | `updating` + `compaction running` | the previous snapshot is invalid while compaction runs |
 | After compaction / model switch | `waiting for the next request` | old snapshot retired |
 | Same failure ≥2 | amber border + `same failure ×2` | same tool, same error class, targets merged |
-| Task >300s without end | `task state unconfirmed` | it never claims the task is still alive |
+| Task >300s without end | `task state unconfirmed` | it never claims the task is alive; the badge retires when that turn ends |
 | Broken records | extra `records incomplete` | some records could not be parsed |
 | Context ≥50% | number turns **amber** | colour only, no extra text |
 | Context ≥65% | number turns **red** | colour only; automatic compaction usually fires between 65–70% |

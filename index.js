@@ -290,6 +290,12 @@ function applyEvent(state, event, call, turnOfEvent) {
   if (event.type === 'turn/end') {
     state.turnOpen = false;
     for (const streak of state.streaks.values()) if (streak.endedAt === void 0) streak.endedAt = event.time;
+    /* A job with no settlement by the end of its turn is over as far as the user
+     * is concerned; keeping a "state unconfirmed" badge afterwards is noise. */
+    for (const job of [...state.openJobs.values()]) {
+      state.openJobs.delete(job.jobId);
+      pushHistory(state, { rule: 'longJob', jobId: job.jobId, kind: job.kind, label: job.label, startedAt: job.startedAt, endedAt: event.time, endedBy: 'turn-ended', count: 1, targetCount: 0 });
+    }
     return;
   }
   if (event.type === 'compaction/start') {

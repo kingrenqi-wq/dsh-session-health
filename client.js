@@ -188,6 +188,35 @@ window.__ModuleLoader__.load({
       return `${minutes}:${String(seconds).padStart(2, '0')}`;
     }
 
+    /**
+     * The session scope is the only place that knows which session view is on
+     * screen: it mounts and unmounts with the conversation. An invisible probe
+     * writes its sessionId here and the overlay follows it.
+     */
+    const activeSession = (() => {
+      let value;
+      const listeners = new Set();
+      return {
+        get: () => value,
+        set(next) {
+          if (next === value) return;
+          value = next;
+          for (const listener of [...listeners]) listener();
+        },
+        subscribe(listener) {
+          listeners.add(listener);
+          return () => listeners.delete(listener);
+        },
+      };
+    })();
+
+    function SessionProbe({ sessionId }) {
+      React.useEffect(() => {
+        if (typeof sessionId === 'string' && sessionId !== '') activeSession.set(sessionId);
+      }, [sessionId]);
+      return null;
+    }
+
     const STORE_KEY = 'dsh-session-health:position:v1';
     const EDGE = 24;
 
@@ -234,11 +263,14 @@ window.__ModuleLoader__.load({
     /** Floating chip plus its evidence panel; the user drags it where they look. */
     function TodayChip({ useSessions, t }) {
       const sessionList = typeof useSessions === 'function' ? useSessions((state) => state) : void 0;
+      const [probed, setProbed] = React.useState(() => activeSession.get());
+      React.useEffect(() => activeSession.subscribe(() => setProbed(activeSession.get())), []);
       const sessionId = React.useMemo(() => {
+        if (typeof probed === 'string' && probed !== '') return probed;
         const rows = sessionList?.byId ?? {};
         const entry = Object.entries(rows).find(([, row]) => ((row?.retainedBy?.mainView) ?? 0) > 0);
         return entry === void 0 ? void 0 : entry[0];
-      }, [sessionList]);
+      }, [probed, sessionList]);
 
       const [state, setState] = React.useState({ phase: 'loading', snapshot: void 0 });
       const [anchor, setAnchor] = React.useState(null);
@@ -517,6 +549,11 @@ window.__ModuleLoader__.load({
       inject: ['slots', 'locale'],
       apply(ctx) {
         ctx.effect(() => ctx.locale.register(NS, DICTIONARIES), 'dsh-session-health: dictionaries');
+        ctx.slots.inject('conversation.composer.dock', () => ctx.slots.register({
+          name: 'conversation.composer.dock',
+          id: 'session-health-probe',
+          order: 99,
+        }, SessionProbe));
         ctx.slots.inject('shell.overlay', () => ctx.slots.register({
           name: 'shell.overlay',
           id: 'today',

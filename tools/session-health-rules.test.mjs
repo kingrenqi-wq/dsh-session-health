@@ -171,6 +171,19 @@ const T = 1_700_000_000_000;
   check('settled job not reported', settled.longJob, null);
 }
 
+// A job still open when its turn ends stops nagging, and lands in history.
+{
+  const now = Date.now();
+  const snap = writeLog([
+    turnStart(now - 400_000),
+    { type: 'job/registered', time: now - 390_000, data: { jobId: 'j-end', kind: 'bash', label: 'x', startedAt: now - 390_000 } },
+    turnEnd(now - 60_000),
+  ]);
+  check('open job is retired at turn end', snap.longJob, null);
+  const entry = snap.history.find((item) => item.jobId === 'j-end');
+  check('retired job records why', entry?.endedBy, 'turn-ended');
+}
+
 // Token identity: fill = (total - output) / window.
 {
   const snap = writeLog([turnStart(T), context(T + 1, 1_000_000), usage(T + 2, 30_000, 1_000)]);
