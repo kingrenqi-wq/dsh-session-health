@@ -1,6 +1,6 @@
 {
   "name": "dsh-session-health",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Floating session-health card for DeepSeek Harness: context fill plus evidence-backed hints when a session repeats failures or a task never finishes.",
   "keywords": [
     "deepseek",

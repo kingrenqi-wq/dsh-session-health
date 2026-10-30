@@ -77,7 +77,7 @@ async function loadComponent() {
     __ModuleLoader__: { load: (value) => { definition = value; } },
     innerWidth: 1440,
     innerHeight: 900,
-    localStorage: { getItem: () => null, setItem: () => {} },
+    localStorage: { getItem: (key) => (globalThis.__LS__ && key in globalThis.__LS__ ? globalThis.__LS__[key] : null), setItem: (key, value) => { globalThis.__LS__ = globalThis.__LS__ ?? {}; globalThis.__LS__[key] = String(value); } },
     addEventListener: () => {},
     removeEventListener: () => {},
   };
@@ -189,6 +189,13 @@ const hotColors = collectColors(await renderTree({ ...base, fill: 0.7 }));
 check('65% turns the number red', hotColors.includes('#e8786e'), JSON.stringify(hotColors));
 const coolColors = collectColors(await renderTree({ ...base, fill: 0.31 }));
 check('below 50% keeps the neutral colour', !coolColors.includes('#dea852') && !coolColors.includes('#e8786e'), JSON.stringify(coolColors));
+
+globalThis.__LS__ = { 'dsh-session-health:cleared:session-x': String(Date.now()) };
+const cleared = await render({ ...base, history: [
+  { rule: 'streak', tool: 'read', category: 'fs-missing', count: 2, startedAt: Date.now() - 600000, endedAt: Date.now() - 500000, endedBy: 'next-turn' },
+] }, true);
+check('cleared history is hidden', cleared.includes('chip.cleared') && !cleared.includes('chip.end.nextTurn'), cleared.slice(-120));
+globalThis.__LS__ = {};
 
 const gap = await render({ ...base, integrity: 'bad-json' });
 check('integrity is visible in the widget', gap.includes('chip.integrity'), gap.slice(0, 90));

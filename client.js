@@ -28,6 +28,8 @@ window.__ModuleLoader__.load({
         'chip.integrity.order': '事件顺序异常，已切断连续性判断',
         'chip.integrity.short': '读取不完整，正在等待追加',
         'chip.history': '最近记录',
+        'chip.clear': '清除',
+        'chip.cleared': '已清除，之后的记录会继续出现',
         'chip.end.nextTurn': '下一轮开始',
         'chip.end.success': '后续调用成功',
         'chip.end.newClass': '换了错误类别',
@@ -58,6 +60,8 @@ window.__ModuleLoader__.load({
         'chip.integrity.order': 'events arrived out of order; continuity was reset',
         'chip.integrity.short': 'short read; waiting for more data',
         'chip.history': 'Recent',
+        'chip.clear': 'clear',
+        'chip.cleared': 'cleared; new records will appear again',
         'chip.end.nextTurn': 'next turn',
         'chip.end.success': 'later succeeded',
         'chip.end.newClass': 'different error',
@@ -102,6 +106,7 @@ window.__ModuleLoader__.load({
     const COLOR_RED = '#e8786e';
     const subLine = { color: 'rgba(168, 176, 205, 0.85)', fontSize: 10.5, lineHeight: '14px' };
     const noteLine = { color: 'rgba(168, 176, 205, 0.85)', fontSize: 10.5, lineHeight: '14px', marginTop: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' };
+    const historyClear = { marginLeft: 8, color: 'var(--dsw-alias-label-tertiary)', cursor: 'pointer', fontWeight: 400 };
     const statusDot = { width: 7, height: 7, borderRadius: 4, display: 'inline-block', marginLeft: 6 };
 
     /** POST one JSON method to the bundle's own host route. */
@@ -195,6 +200,18 @@ window.__ModuleLoader__.load({
       } catch { return null; }
     }
 
+    function readCleared(sessionId) {
+      try {
+        const raw = window.localStorage.getItem(`dsh-session-health:cleared:${sessionId}`);
+        const value = Number(raw);
+        return Number.isFinite(value) ? value : 0;
+      } catch { return 0; }
+    }
+
+    function writeCleared(sessionId, at) {
+      try { window.localStorage.setItem(`dsh-session-health:cleared:${sessionId}`, String(at)); } catch { /* storage unavailable */ }
+    }
+
     function writePosition(value) {
       try { window.localStorage.setItem(STORE_KEY, JSON.stringify(value)); } catch { /* storage unavailable */ }
     }
@@ -225,6 +242,7 @@ window.__ModuleLoader__.load({
 
       const [state, setState] = React.useState({ phase: 'loading', snapshot: void 0 });
       const [anchor, setAnchor] = React.useState(null);
+      const [clearedAt, setClearedAt] = React.useState(() => (typeof sessionId === 'string' ? readCleared(sessionId) : 0));
       const ref = React.useRef(null);
       const [pos, setPos] = React.useState(() => readPosition() ?? defaultPosition());
       const [dragging, setDragging] = React.useState(false);
@@ -275,6 +293,10 @@ window.__ModuleLoader__.load({
         return () => window.removeEventListener('resize', onResize);
       }, []);
 
+
+      React.useEffect(() => {
+        setClearedAt(typeof sessionId === 'string' ? readCleared(sessionId) : 0);
+      }, [sessionId]);
 
       React.useEffect(() => {
         if (typeof sessionId !== 'string' || sessionId === '') return void 0;
@@ -383,10 +405,25 @@ window.__ModuleLoader__.load({
             longJob.label ? h('div', { key: 'jl', style: target }, longJob.label) : null,
             h('div', { key: 'jn', style: cardRow }, '没有结束记录，不等于还在运行')));
         }
-        const history = Array.isArray(snapshot.history) ? snapshot.history.slice(-3) : [];
-        if (history.length > 0) {
+        const allHistory = Array.isArray(snapshot.history) ? snapshot.history : [];
+        const history = allHistory.filter((item) => (item.endedAt ?? 0) > clearedAt).slice(-3);
+        const hiddenCount = allHistory.length - history.length;
+        if (allHistory.length > 0) {
           rows.push(h('div', { key: 'h', style: section },
-            h('div', { key: 'hh', style: cardTitle }, t('chip.history')),
+            h('div', { key: 'hh', style: cardTitle },
+              h('span', null, t('chip.history')),
+              h('span', {
+                style: historyClear,
+                role: 'button',
+                onClick: () => {
+                  const at = Date.now();
+                  setClearedAt(at);
+                  writeCleared(sessionId, at);
+                },
+              }, t('chip.clear'))),
+            history.length === 0
+              ? h('div', { key: 'hc', style: cardRow }, t('chip.cleared'))
+              : null,
             ...history.map((item, index) => h('div', { key: `hi${index}`, style: cardRow },
               item.rule === 'longJob'
                 ? `${clockOf(item.startedAt)} ${item.kind} · ${endText(t, item.endedBy)}`

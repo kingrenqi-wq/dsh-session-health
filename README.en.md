@@ -2,6 +2,8 @@
 
 A small floating card for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness): it shows the current session's context fill, and turns amber for two situations that are worth a look — the same tool failing repeatedly, or a task with no terminal state for a long time. Clicking it shows the evidence.
 
+The "Recent" list is rebuilt from the log and covers the whole session; the **clear** link next to its title hides earlier entries locally without touching the log.
+
 ![preview](docs/preview.png)
 
 > Design mock drawn from the real styles, not a screenshot.
