@@ -25,7 +25,7 @@ A small floating card for [DeepSeek Harness](https://github.com/deepseek-ai/deep
 - No judgement about whether the answer is right, no ETA, no score.
 - **No actions**: it never stops, retries, compacts or sends anything.
 - **No network**: it only reads `~/.dsh/sessions/**/session.v4.jsonl.zstd` and writes nothing.
-- No balance or spend (the bottom info bar already covers that).
+- No balance or spend (dedicated plugins already cover that).
 
 ## Install
 
