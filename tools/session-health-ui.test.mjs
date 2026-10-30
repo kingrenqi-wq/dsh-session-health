@@ -52,6 +52,15 @@ function makeReact() {
   return { React, pending, resetCursor: () => { cursor = 0; } };
 }
 
+function collectColors(tree, out = []) {
+  if (tree === null || tree === void 0 || typeof tree !== 'object') return out;
+  if (Array.isArray(tree)) { for (const child of tree) collectColors(child, out); return out; }
+  const color = tree.props?.style?.color;
+  if (typeof color === 'string') out.push(color);
+  if (tree.children) collectColors(tree.children, out);
+  return out;
+}
+
 function collectText(tree, out = []) {
   if (tree === null || tree === void 0 || tree === false) return out;
   if (typeof tree === 'string' || typeof tree === 'number') { out.push(String(tree)); return out; }
@@ -84,6 +93,27 @@ async function loadComponent() {
 }
 
 /** Run the component to a settled state, returning its text. */
+async function renderTree(payload) {
+  const { module, runtime } = await loadComponent();
+  let component;
+  const ctx = {
+    effect: (fn) => fn(),
+    locale: { register: () => () => {} },
+    slots: { inject: (name, cb) => cb(), register: (options, instance) => { component = instance; return () => {}; } },
+  };
+  module.apply(ctx);
+  globalThis.fetch = async () => ({ ok: true, status: 200, text: async () => JSON.stringify(payload) });
+  let tree;
+  for (let pass = 0; pass < 3; pass += 1) {
+    runtime.resetCursor();
+    const effects = runtime.pending.splice(0);
+    tree = component({ t: (key, params) => (params ? `${key}:${JSON.stringify(params)}` : key), useSessions: (selector) => selector({ byId: { 'session-x': { retainedBy: { mainView: 1 } } } }) });
+    for (const effect of effects) effect();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+  return tree;
+}
+
 async function render(payload, open = false) {
   const { module, runtime } = await loadComponent();
   let component;
@@ -152,6 +182,13 @@ const bothHints = await render({
   longJob: { jobId: 'j1', kind: 'bash', label: 'build', startedAt: Date.now() - 400000, ageMs: 400000, confirmed: false },
 });
 check('streak outranks the long job', bothHints.includes('chip.streak') && !bothHints.includes('chip.pending'), bothHints.slice(0, 90));
+
+const halfwayColors = collectColors(await renderTree({ ...base, fill: 0.55 }));
+check('50% turns the number amber', halfwayColors.includes('#dea852'), JSON.stringify(halfwayColors));
+const hotColors = collectColors(await renderTree({ ...base, fill: 0.7 }));
+check('65% turns the number red', hotColors.includes('#e8786e'), JSON.stringify(hotColors));
+const coolColors = collectColors(await renderTree({ ...base, fill: 0.31 }));
+check('below 50% keeps the neutral colour', !coolColors.includes('#dea852') && !coolColors.includes('#e8786e'), JSON.stringify(coolColors));
 
 const gap = await render({ ...base, integrity: 'bad-json' });
 check('integrity is visible in the widget', gap.includes('chip.integrity'), gap.slice(0, 90));

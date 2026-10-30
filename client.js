@@ -95,6 +95,11 @@ window.__ModuleLoader__.load({
     const mutedInCard = { color: 'rgba(168, 176, 205, 0.85)' };
     const labelRow = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'rgba(168, 176, 205, 0.85)', fontSize: 11, lineHeight: '14px' };
     const bigNumber = { fontSize: 30, lineHeight: '36px', fontWeight: 500, marginTop: 2, letterSpacing: '-0.5px' };
+    /* Fill thresholds: 50% amber, 65% red. Only the number changes colour. */
+    const FILL_AMBER = 50;
+    const FILL_RED = 65;
+    const COLOR_AMBER = '#dea852';
+    const COLOR_RED = '#e8786e';
     const subLine = { color: 'rgba(168, 176, 205, 0.85)', fontSize: 10.5, lineHeight: '14px' };
     const noteLine = { color: 'rgba(168, 176, 205, 0.85)', fontSize: 10.5, lineHeight: '14px', marginTop: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' };
     const statusDot = { width: 7, height: 7, borderRadius: 4, display: 'inline-block', marginLeft: 6 };
@@ -335,6 +340,11 @@ window.__ModuleLoader__.load({
       const snapshot = bound ? state.snapshot : void 0;
       const integrity = typeof snapshot?.integrity === 'string' ? snapshot.integrity : null;
       const pct = snapshot?.fill != null ? percent(snapshot.fill) : null;
+      const fillPercent = snapshot?.fill != null ? snapshot.fill * 100 : null;
+      const fillColor = fillPercent === null ? null
+        : fillPercent >= FILL_RED ? COLOR_RED
+          : fillPercent >= FILL_AMBER ? COLOR_AMBER
+            : null;
       const streak = snapshot?.streak ?? null;
       const longJob = snapshot?.longJob ?? null;
       const warn = streak !== null || longJob !== null;
@@ -444,7 +454,13 @@ window.__ModuleLoader__.load({
         h('div', { style: labelRow },
           h('span', null, t('chip.label')),
           h('span', { style: { ...statusDot, background: warn ? '#f0b465' : '#78beff' } })),
-        h('div', { style: { ...bigNumber, opacity: stale ? 0.6 : 1 } }, numberText),
+        h('div', {
+          style: {
+            ...bigNumber,
+            opacity: stale ? 0.6 : 1,
+            ...(fillColor !== null ? { color: fillColor } : {}),
+          },
+        }, numberText),
         h('div', { style: subLine }, tokens),
         h('div', { style: { ...noteLine, color: warn ? '#f0b465' : 'rgba(168, 176, 205, 0.85)' } }, note),
         anchor === null ? null : h('div', {

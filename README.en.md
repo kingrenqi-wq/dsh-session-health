@@ -17,6 +17,8 @@ A small floating card for [DeepSeek Harness](https://github.com/deepseek-ai/deep
 | Same failure ≥2 | amber border + `same failure ×2` | same tool, same error class, targets merged |
 | Task >300s without end | `task state unconfirmed` | it never claims the task is still alive |
 | Broken records | extra `records incomplete` | some records could not be parsed |
+| Context ≥50% | number turns **amber** | colour only, no extra text |
+| Context ≥65% | number turns **red** | colour only |
 
 ## What it never does
 
