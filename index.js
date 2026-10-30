@@ -1,11 +1,11 @@
 /**
- * Host half of the today-panel bundle.
+ * Host half of the session-health bundle.
  *
  * Reads the current session's log incrementally and returns a small snapshot:
  * context fill, plus two kinds of hints (repeated same-tool failures, a task
  * that has not finished). Read-only: it never writes to the sessions directory.
  *
- * Route: POST /_dsh/dsh-today-panel/<method>, JSON in/out, same-origin only.
+ * Route: POST /_dsh/dsh-session-health/<method>, JSON in/out, same-origin only.
  */
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -656,6 +656,6 @@ export function apply(ctx) {
         },
       });
       return () => dispose();
-    }, 'dsh-today-panel: web routes');
+    }, 'dsh-session-health: web routes');
   });
 }

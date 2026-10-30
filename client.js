@@ -5,7 +5,7 @@ window.__ModuleLoader__.load({
     const h = React.createElement;
 
     /** Locale namespace served through the Client locale service. */
-    const NS = 'dsh-today-panel';
+    const NS = 'dsh-session-health';
     const ROUTE = '/_dsh/dsh-session-health';
     const POLL_MS = 5000;
     const REQUEST_TIMEOUT_MS = 10_000;
@@ -479,7 +479,7 @@ window.__ModuleLoader__.load({
     return {
       inject: ['slots', 'locale'],
       apply(ctx) {
-        ctx.effect(() => ctx.locale.register(NS, DICTIONARIES), 'dsh-today-panel: dictionaries');
+        ctx.effect(() => ctx.locale.register(NS, DICTIONARIES), 'dsh-session-health: dictionaries');
         ctx.slots.inject('shell.overlay', () => ctx.slots.register({
           name: 'shell.overlay',
           id: 'today',
