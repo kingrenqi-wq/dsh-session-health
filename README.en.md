@@ -18,7 +18,7 @@ A small floating card for [DeepSeek Harness](https://github.com/deepseek-ai/deep
 | Task >300s without end | `task state unconfirmed` | it never claims the task is still alive |
 | Broken records | extra `records incomplete` | some records could not be parsed |
 | Context ≥50% | number turns **amber** | colour only, no extra text |
-| Context ≥65% | number turns **red** | colour only |
+| Context ≥65% | number turns **red** | colour only; automatic compaction usually fires between 65–70% |
 
 ## What it never does
 
