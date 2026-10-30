@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Today Pill",
-    "description": "Shows today's focused hours above the composer (demo data)."
+    "title": "Session Health",
+    "description": "Floating card with context fill, plus evidence when a tool keeps failing or a task never finishes. Read-only, offline."
   }
 }
