@@ -2,7 +2,15 @@
   "name": "dsh-session-health",
   "version": "1.0.0",
   "description": "Floating session-health card for DeepSeek Harness: context fill plus evidence-backed hints when a session repeats failures or a task never finishes.",
-  "keywords": ["deepseek", "deepseek-harness", "dsh", "dsh-plugin", "session", "context", "observability"],
+  "keywords": [
+    "deepseek",
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "session",
+    "context",
+    "observability"
+  ],
   "license": "MIT",
   "type": "module",
   "private": false,
@@ -12,9 +20,17 @@
     "./locale/*.json": "./locale/*.json",
     "./icon": "./icon.svg"
   },
-  "files": ["index.js", "client.js", "cordis.patch.yml", "locale/*.json", "icon.svg"],
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg"
+  ],
   "dsh": {
-    "bundle": { "patch": "./cordis.patch.yml" },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
     "client": {
       "platform": "web",
       "immediately": true,
@@ -25,5 +41,15 @@
       ]
     }
   },
-  "engines": { "node": ">=22.13.0" }
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kingrenqi-wq/dsh-session-health.git"
+  },
+  "homepage": "https://github.com/kingrenqi-wq/dsh-session-health",
+  "bugs": {
+    "url": "https://github.com/kingrenqi-wq/dsh-session-health/issues"
+  }
 }

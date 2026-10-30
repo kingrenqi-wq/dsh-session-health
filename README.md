@@ -36,7 +36,7 @@
 dsh-session-health
 
 # Git
-https://github.com/<you>/dsh-session-health
+https://github.com/kingrenqi-wq/dsh-session-health
 
 # 本地目录
 /绝对/路径/dsh-session-health
